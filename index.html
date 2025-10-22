@@ -2,7 +2,7 @@
 <html lang="pt-BR">
  <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tabuleiro Imersivo - Educação Sexual</title>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
   <style>
@@ -285,8 +285,7 @@
         }
 
         .square-character {
-            /* Estilo dos avatares dentro das casas */
-            font-size: 0; 
+            font-size: 0; /* Esconde o emoji */
             width: 45px;
             height: 45px;
             border-radius: 50%;
@@ -876,16 +875,16 @@
   <audio id="sfxError"><source src="assets/audio/error.mp3"></audio>
   <audio id="sfxWin"><source src="assets/audio/win.wav"></audio>
   <script>
-        // --- MAPA DE IMAGENS PERSONALIZADAS ---
+        // --- MAPA DE IMAGENS PERSONALIZADAS (AJUSTADO PARA NOVOS NOMES DE ARQUIVO) ---
         const CHARACTER_IMAGES = {
-            'girl_default': 'assets/img/3.jpg',
-            'girl_question': 'assets/img/2.jpg',
-            'girl_win': 'assets/img/5.jpg',
-            'girl_lose': 'assets/img/6.jpg',
-            'boy_default': 'assets/img/4.jpg', 
-            'boy_question': 'assets/img/7.jpg',
-            'boy_win': 'assets/img/4.jpg',
-            'boy_lose': 'assets/img/7.jpg'
+            'girl_default': 'assets/img/1000007035.png', // Garota Ideia/Default
+            'girl_question': 'assets/img/1000007034.png', // Garota Pergunta
+            'girl_win': 'assets/img/1000007044.png', // Garota YES!/GOOD JOB!
+            'girl_lose': 'assets/img/1000007045.png', // Garota NO!
+            'boy_default': 'assets/img/1000007043.png', // Garoto YES! (Usado como default)
+            'boy_question': 'assets/img/1000007040.png', // Garoto Pergunta
+            'boy_win': 'assets/img/1000007043.png', // Garoto YES!
+            'boy_lose': 'assets/img/1000007046.png' // Garoto WHAT?!
         };
 
         // --- DADOS EDUCATIVOS DO JOGO (mantidos) ---
@@ -966,7 +965,7 @@
             audioElement.play().catch(e => console.log("Erro ao tocar áudio:", e));
         }
 
-        // --- FUNÇÃO DE MENSAGEM INLINE ---
+        // --- FUNÇÃO DE MENSAGEM INLINE (mantida) ---
         function showInlineMessage(message) {
             const messageElement = document.createElement('div');
             messageElement.style.cssText = `
@@ -1062,7 +1061,7 @@
             }, 500);
         }
 
-        // --- FUNÇÕES DE PERSONAGEM (CORRIGIDAS PARA USAR IMAGENS) ---
+        // --- FUNÇÕES DE PERSONAGEM (IMAGENS CUSTOMIZADAS) ---
         function setAvatarImage(avatarElement, characterType, state) {
             const imageKey = `${characterType}_${state}`;
             const imagePath = CHARACTER_IMAGES[imageKey];
@@ -1081,9 +1080,11 @@
             const message = document.getElementById('characterMessage');
             
             if (characterCard && avatar && message) {
+                // Determina o tipo de personagem baseado na casa (par/ímpar)
                 const characterType = housePosition % 2 === 0 ? 'girl' : 'boy';
                 const characterName = characterType === 'girl' ? 'Ana' : 'João';
                 
+                // Remove classes anteriores
                 characterCard.classList.remove('happy', 'sad');
                 avatar.classList.remove('happy', 'sad');
                 message.classList.remove('happy', 'sad');
@@ -1092,8 +1093,10 @@
                 setAvatarImage(avatar, characterType, 'question');
                 message.textContent = `Olá! Eu sou ${characterName}! 😊`;
                 
+                // Mostra o card
                 characterCard.classList.add('show');
                 
+                // Remove após 2 segundos
                 setTimeout(() => {
                     characterCard.classList.remove('show');
                 }, 2000);
@@ -1201,26 +1204,26 @@
                 square.style.animationDelay = `${i * 0.1}s`;
                 
                 let isGirl = i % 2 === 0;
-                let charIcon, labelText;
+                let charIcon = isGirl ? '👧' : '👦';
+                let labelText;
 
                 if (i === 1) {
                     square.classList.add('start');
-                    charIcon = '🚀'; // Mantido emoji para INÍCIO
+                    charIcon = '🚀';
                     labelText = 'INÍCIO';
                 } else if (i === 40) {
                     square.classList.add('finish');
-                    charIcon = '🏆'; // Mantido emoji para FIM
+                    charIcon = '🏆';
                     labelText = 'FIM';
                 } else {
                     square.classList.add('vf');
-                    charIcon = '🎯'; 
+                    charIcon = '🎯';
                     labelText = 'V/F';
                 }
 
                 const character = document.createElement('div');
                 character.className = 'square-character';
-                
-                // CORREÇÃO: Usa a imagem DEFAULT para as casas do tabuleiro
+                // Define a imagem de fundo para o elemento da casa (usando imagem default)
                 setAvatarImage(character, isGirl ? 'girl' : 'boy', 'default'); 
                 
                 const label = document.createElement('div');
@@ -1230,8 +1233,15 @@
                 square.appendChild(label);
 
                 if (i === 1) {
-                    const player1 = document.createElement('div'); player1.className = 'player player1'; player1.textContent = '1'; square.appendChild(player1);
-                    const player2 = document.createElement('div'); player2.className = 'player player2'; player2.textContent = '2'; square.appendChild(player2);
+                    const player1 = document.createElement('div');
+                    player1.className = 'player player1';
+                    player1.textContent = '1';
+                    square.appendChild(player1);
+                    
+                    const player2 = document.createElement('div');
+                    player2.className = 'player player2';
+                    player2.textContent = '2';
+                    square.appendChild(player2);
                 }
                 
                 board.appendChild(square);
@@ -1268,7 +1278,9 @@
             
             const currentSquare = document.getElementById(`square-${oldPosition}`);
             const playerElement = currentSquare.querySelector(`.player.player${gameState.currentPlayer}`);
-            if (playerElement) { playerElement.remove(); }
+            if (playerElement) { 
+                playerElement.remove(); 
+            }
             
             const newSquare = document.getElementById(`square-${player.position}`);
             const newPlayer = document.createElement('div');
