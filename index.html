@@ -2,12 +2,10 @@
 <html lang="pt-BR">
  <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
   <title>Tabuleiro Imersivo - Educação Sexual</title>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
   <style>
-        /* [Seu CSS COMPLETO MANTIDO. Removido para brevidade, exceto as regras críticas] */
-
         body {
             box-sizing: border-box;
             margin: 0;
@@ -19,10 +17,275 @@
             overflow-x: auto;
             position: relative;
         }
-        /* ... outros estilos ... */
 
-        /* CORREÇÃO CSS CRÍTICA para que o avatar carregue a imagem e oculte o texto/emoji */
+        /* Splash Screen com Capa do Vídeo */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease;
+        }
+
+        .video-cover {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .video-thumbnail {
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+
+        .play-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .play-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .play-icon {
+            font-size: 3rem;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .play-text {
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .video-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .video-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        #introVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Botão de Mute */
+        #muteButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        #muteButton:hover {
+            background: rgba(255,255,255,1);
+            transform: scale(1.1);
+        }
+
+        /* Animações de entrada */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        /* Jogo principal (oculto inicialmente) */
+        .game-container {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            font-size: 2.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .instructions {
+            font-size: 1.2rem;
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        /* Tabuleiro Circular */
+        #gameBoard {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .square {
+            position: absolute;
+            width: 80px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .square:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-color: #ffd700;
+        }
+
+        .square.start {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+        }
+
+        .square.finish {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+        }
+
+        .square.vf {
+            background: linear-gradient(135deg, #9f7aea, #805ad5);
+        }
+
         .square-character {
+            /* Estilo dos avatares dentro das casas */
             font-size: 0; 
             width: 45px;
             height: 45px;
@@ -31,6 +294,183 @@
             background-position: center;
             border: 2px solid rgba(255, 255, 255, 0.8);
             margin-bottom: 5px;
+        }
+
+        .square-number {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        /* Jogadores */
+        .player {
+            position: absolute;
+            bottom: -15px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            border: 3px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .player1 {
+            background: #e53e3e;
+            left: 10px;
+        }
+
+        .player2 {
+            background: #3182ce;
+            right: 10px;
+        }
+
+        /* Stats dos Jogadores */
+        .players-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            gap: 20px;
+        }
+
+        .player-stat {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 200px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .player-stat.active {
+            border: 3px solid #ffd700;
+            transform: scale(1.05);
+        }
+
+        .player-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .player-name.active {
+            color: #d69e2e;
+        }
+
+        .player-coins, .player-bombs {
+            font-size: 1rem;
+            margin: 5px 0;
+            color: #4a5568;
+        }
+
+        /* Roleta */
+        .roulette-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            gap: 30px;
+        }
+
+        #roulette {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ff6b6b 0deg 60deg,
+                #4ecdc4 60deg 120deg,
+                #45b7d1 120deg 180deg,
+                #96ceb4 180deg 240deg,
+                #feca57 240deg 300deg,
+                #ff9ff3 300deg 360deg
+            );
+            position: relative;
+            cursor: pointer;
+            transition: transform 2s cubic-bezier(0.23, 1, 0.32, 1);
+            border: 5px solid #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        #roulette.spinning {
+            animation: spin 2s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(1440deg); }
+        }
+
+        #rouletteResult {
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .spin-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .spin-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        /* Character Card Styles */
+        .character-card {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            z-index: 1500;
+            transition: all 0.3s ease;
+            opacity: 0;
+            backdrop-filter: blur(10px);
+            border: 3px solid transparent;
+        }
+
+        .character-card.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .character-card.happy {
+            border-color: #48bb78;
+            background: linear-gradient(135deg, rgba(72, 187, 120, 0.1), rgba(255, 255, 255, 0.95));
+        }
+
+        .character-card.sad {
+            border-color: #f56565;
+            background: linear-gradient(135deg, rgba(245, 101, 101, 0.1), rgba(255, 255, 255, 0.95));
         }
 
         .character-avatar {
@@ -43,16 +483,308 @@
             border: 4px solid #e2e8f0;
             transition: all 0.3s ease;
             
-            /* CORREÇÃO CRÍTICA */
+            /* Garante que o texto/emoji seja removido */
             font-size: 0 !important; 
             text-indent: -9999px; 
             overflow: hidden;
-            display: flex; /* Garante que as propriedades de fundo funcionem */
         }
-        /* ... (Resto do CSS Original) ... */
+
+        .character-avatar.happy {
+            border-color: #48bb78;
+            transform: scale(1.1);
+        }
+
+        .character-avatar.sad {
+            border-color: #f56565;
+            transform: scale(0.9);
+        }
+
+        .character-message {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4a5568;
+            transition: all 0.3s ease;
+        }
+
+        .character-message.happy {
+            color: #38a169;
+        }
+
+        .character-message.sad {
+            color: #e53e3e;
+        }
+
+        /* Question Modal Styles */
+        .question-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1600;
+        }
+
+        .question-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            color: #2d3748;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .question-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-answer {
+            background: #4299e1;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .btn-answer:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        /* Explanation Modal */
+        .explanation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1700;
+        }
+
+        .explanation-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 90%;
+            text-align: left;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        .explanation-text {
+            font-size: 1.2rem;
+            color: #2d3748;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .btn-continue {
+            background: #4299e1;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .btn-continue:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        /* Bomb Animation */
+        .bomb-explosion {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8rem;
+            z-index: 2000;
+            animation: explode 1s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes explode {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+        }
+
+        /* Coin Animation */
+        .coin-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            z-index: 2000;
+            animation: coinFlip 1s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes coinFlip {
+            0% { transform: translate(-50%, -50%) scale(0) rotateY(0deg); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.2) rotateY(180deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0.8) rotateY(360deg); opacity: 0; }
+        }
+
+        /* Efeitos de fundo */
+        .bubbles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .bubble:nth-child(1) {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .bubble:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            left: 20%;
+            animation-delay: 2s;
+        }
+
+        .bubble:nth-child(3) {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #45b7d1, #96c93d);
+            left: 35%;
+            animation-delay: 4s;
+        }
+
+        .bubble:nth-child(4) {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #96ceb4, #feca57);
+            left: 50%;
+            animation-delay: 0s;
+        }
+
+        .bubble:nth-child(5) {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+            left: 70%;
+            animation-delay: 3s;
+        }
+
+        .bubble:nth-child(6) {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #ff9ff3, #667eea);
+            left: 80%;
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateY(-10vh) rotate(180deg);
+                opacity: 0.8;
+            }
+        }
 
         @media (max-width: 768px) {
-            /* ... estilos mobile ... */
+            .video-cover {
+                height: 300px;
+                margin: 20px;
+            }
+            
+            .video-title {
+                font-size: 1.5rem;
+            }
+            
+            .video-subtitle {
+                font-size: 1rem;
+            }
+            
+            .play-button {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .play-icon {
+                font-size: 2.5rem;
+            }
+
+            #gameBoard {
+                width: 400px;
+                height: 400px;
+            }
+
+            .square {
+                width: 60px;
+                height: 80px;
+            }
+
+            .question-content {
+                padding: 30px 20px;
+            }
+
+            .question-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .players-stats {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
   <style>@view-transition { navigation: auto; }</style>
@@ -340,8 +1072,7 @@
                 avatarElement.style.backgroundImage = `url('${imagePath}')`;
                 avatarElement.style.backgroundSize = 'cover';
                 avatarElement.style.backgroundPosition = 'center';
-                // Garante que o texto/emoji seja removido
-                avatarElement.textContent = '';
+                avatarElement.textContent = ''; // Garante que o texto/emoji seja removido
             }
         }
 
@@ -475,7 +1206,8 @@
                 square.style.animationDelay = `${i * 0.1}s`;
                 
                 let isGirl = i % 2 === 0;
-                let charIcon, labelText;
+                let charIcon = isGirl ? '👧' : '👦';
+                let labelText;
 
                 if (i === 1) {
                     square.classList.add('start');
@@ -548,9 +1280,7 @@
             
             const currentSquare = document.getElementById(`square-${oldPosition}`);
             const playerElement = currentSquare.querySelector(`.player.player${gameState.currentPlayer}`);
-            if (playerElement) { 
-                playerElement.remove(); 
-            }
+            if (playerElement) { playerElement.remove(); }
             
             const newSquare = document.getElementById(`square-${player.position}`);
             const newPlayer = document.createElement('div');
@@ -793,14 +1523,6 @@
 
         // Inicializar
         document.addEventListener('DOMContentLoaded', function() {
-            if (window.elementSdk) {
-                window.elementSdk.init({
-                    defaultConfig,
-                    render,
-                    mapToCapabilities,
-                    mapToEditPanelValues
-                });
-            }
             // Chama a inicialização do jogo para carregar o tabuleiro
             initializeFullGame();
         });
