@@ -6,7 +6,6 @@
   <title>Tabuleiro Imersivo - Educação Sexual</title>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
   <style>
-        /* CSS Original (Completo) */
         body {
             box-sizing: border-box;
             margin: 0;
@@ -476,6 +475,11 @@
             background-position: center;
             border: 4px solid #e2e8f0;
             transition: all 0.3s ease;
+            
+            /* CORREÇÃO CSS: Garante que o emoji/texto não apareça */
+            font-size: 0 !important; 
+            text-indent: -9999px; 
+            overflow: hidden;
         }
 
         .character-avatar.happy {
@@ -780,8 +784,7 @@
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
- <body>
-  <div class="bubbles">
+ <body><div class="bubbles">
    <div class="bubble"></div>
    <div class="bubble"></div>
    <div class="bubble"></div>
@@ -863,14 +866,14 @@
    </div><div id="gameBoard"></div>
   </div><audio id="bgm" loop><source src="assets/audio/bgm.mp3" type="audio/mpeg">
   </audio>
-  <audio id="sfxCoin"><source src="assets/audio/coin.wav" type="audio/mpeg">
+  <audio id="sfxCoin"><source src="assets/audio/coin.wav" type="audio/wav">
   </audio>
   <audio id="sfxError"><source src="assets/audio/error.mp3" type="audio/mpeg">
   </audio>
-  <audio id="sfxWin"><source src="assets/audio/win.wav" type="audio/mpeg">
+  <audio id="sfxWin"><source src="assets/audio/win.wav" type="audio/wav">
   </audio>
   <script>
-        // --- MAPA DE IMAGENS PERSONALIZADAS (CAMINHOS ATUALIZADOS) ---
+        // --- MAPA DE IMAGENS PERSONALIZADAS (CORRIGIDO) ---
         const CHARACTER_IMAGES = {
             'girl_default': 'assets/img/3.jpg',
             'girl_question': 'assets/img/2.jpg',
@@ -1008,7 +1011,7 @@
             }
         }
 
-        // --- FUNÇÕES DE VÍDEO E SPLASH SCREEN ---
+        // --- FUNÇÕES DE VÍDEO ---
         function startVideo() {
             const videoThumbnail = document.getElementById('videoThumbnail');
             const video = document.getElementById('introVideo');
@@ -1019,8 +1022,7 @@
             video.style.display = 'block';
             video.classList.add('fade-in');
             
-            // Tenta dar play no vídeo
-            video.play().catch(e => console.log("Erro ao tentar tocar vídeo:", e));
+            video.play();
             videoStarted = true;
             
             setTimeout(() => {
@@ -1059,7 +1061,6 @@
 
         // --- FUNÇÕES DE PERSONAGEM (IMAGENS CUSTOMIZADAS) ---
         function setAvatarImage(avatarElement, characterType, state) {
-            // Mapeamento usa os caminhos de assets/img/
             const imageKey = `${characterType}_${state}`;
             const imagePath = CHARACTER_IMAGES[imageKey];
             
@@ -1067,8 +1068,6 @@
                 avatarElement.style.backgroundImage = `url('${imagePath}')`;
                 avatarElement.style.backgroundSize = 'cover';
                 avatarElement.style.backgroundPosition = 'center';
-                // Remove o conteúdo de texto (emoji)
-                avatarElement.textContent = '';
             }
         }
 
@@ -1078,26 +1077,30 @@
             const message = document.getElementById('characterMessage');
             
             if (characterCard && avatar && message) {
+                // Determina o tipo de personagem baseado na casa (par/ímpar)
                 const characterType = housePosition % 2 === 0 ? 'girl' : 'boy';
                 const characterName = characterType === 'girl' ? 'Ana' : 'João';
                 
+                // Remove classes anteriores
                 characterCard.classList.remove('happy', 'sad');
                 avatar.classList.remove('happy', 'sad');
                 message.classList.remove('happy', 'sad');
                 
-                // Imagem de pergunta/default
+                // Define a imagem e mensagem do personagem
                 setAvatarImage(avatar, characterType, 'question');
-                message.textContent = `Olá! Eu sou ${characterName}! Tenho uma pergunta!`;
+                message.textContent = `Olá! Eu sou ${characterName}! 😊`;
                 
+                // Mostra o card
                 characterCard.classList.add('show');
                 
+                // Remove após 2 segundos
                 setTimeout(() => {
                     characterCard.classList.remove('show');
                 }, 2000);
             }
         }
 
-        function showCharacterFeedback(isCorrect, characterType) {
+        function showCharacterFeedback(isCorrect, characterType = 'girl') {
             const characterCard = document.getElementById('characterCard');
             const avatar = document.getElementById('characterAvatar');
             const message = document.getElementById('characterMessage');
@@ -1111,29 +1114,31 @@
                     characterCard.classList.add('happy');
                     avatar.classList.add('happy');
                     message.classList.add('happy');
-                    message.textContent = 'Acerto! Mandou bem! 😊';
+                    message.textContent = 'Parabéns! 😊';
                     setAvatarImage(avatar, characterType, 'win');
+                    playAudio(sfxWin, 0.8);
                 } else {
                     characterCard.classList.add('sad');
                     avatar.classList.add('sad');
                     message.classList.add('sad');
-                    message.textContent = 'Ops! Não foi dessa vez. 😔';
+                    message.textContent = 'Que pena! 😔';
                     setAvatarImage(avatar, characterType, 'lose');
+                    playAudio(sfxError, 0.5);
                 }
                 
                 characterCard.classList.add('show');
                 
                 setTimeout(() => {
-                    // Esconde após o feedback
                     characterCard.classList.remove('show', 'happy', 'sad');
                     avatar.classList.remove('happy', 'sad');
                     message.classList.remove('happy', 'sad');
                     message.textContent = 'Boa sorte!';
+                    setAvatarImage(avatar, characterType, 'default');
                 }, 3000);
             }
         }
 
-        // --- SISTEMA DE PERGUNTAS E RESPOSTAS ---
+        // --- SISTEMA DE PERGUNTAS EDUCATIVAS ---
         function sortearPergunta() {
             const todasPerguntas = [...perguntasInformativas, ...perguntasRisco];
             const indice = Math.floor(Math.random() * todasPerguntas.length);
@@ -1152,14 +1157,14 @@
             if (!currentQuestion) return;
             
             const acertou = resposta === currentQuestion.resposta_correta;
-            const characterType = gameState.players[gameState.currentPlayer].position % 2 === 0 ? 'girl' : 'boy';
+            const tipoPersonagem = gameState.players[gameState.currentPlayer].position % 2 === 0 ? 'girl' : 'boy';
             
             document.getElementById('questionModal').style.display = 'none';
             
-            showCharacterFeedback(acertou, characterType);
+            showCharacterFeedback(acertou, tipoPersonagem);
             
             setTimeout(() => {
-                document.getElementById('explanationText').textContent = `Resposta: ${currentQuestion.explicacao}`;
+                document.getElementById('explanationText').textContent = currentQuestion.explicacao;
                 document.getElementById('explanationModal').style.display = 'flex';
             }, 1500);
             
@@ -1174,11 +1179,13 @@
             currentQuestionCallback = null;
         }
 
-        // --- FUNÇÕES DO TABULEIRO (mantidas/ajustadas) ---
+        // --- FUNÇÕES DO TABULEIRO ---
         function initializeBoard() {
             const board = document.getElementById('gameBoard');
             board.innerHTML = '';
-            const radius = 250; const centerX = 300; const centerY = 300;
+            const radius = 250;
+            const centerX = 300;
+            const centerY = 300;
 
             for (let i = 1; i <= 40; i++) {
                 const square = document.createElement('div');
@@ -1189,26 +1196,55 @@
                 const x = centerX + radius * Math.cos(angle);
                 const y = centerY + radius * Math.sin(angle);
                 
-                square.style.left = `${x - 40}px`; square.style.top = `${y - 50}px`; square.style.animationDelay = `${i * 0.05}s`;
+                square.style.left = `${x - 40}px`;
+                square.style.top = `${y - 50}px`;
+                square.style.animationDelay = `${i * 0.1}s`;
                 
-                let charIcon; let labelText;
-                if (i === 1) { square.classList.add('start'); charIcon = '🚀'; labelText = 'INÍCIO'; } 
-                else if (i === 40) { square.classList.add('finish'); charIcon = '🏆'; labelText = 'FIM'; } 
-                else { square.classList.add('vf'); charIcon = '🎯'; labelText = 'V/F'; }
+                let isGirl = i % 2 === 0;
+                let charIcon = isGirl ? '👧' : '👦';
+                let labelText;
 
-                const character = document.createElement('div'); character.className = 'square-character'; character.textContent = charIcon;
-                const label = document.createElement('div'); label.className = 'square-number'; label.textContent = labelText;
+                if (i === 1) {
+                    square.classList.add('start');
+                    charIcon = '🚀';
+                    labelText = 'INÍCIO';
+                } else if (i === 40) {
+                    square.classList.add('finish');
+                    charIcon = '🏆';
+                    labelText = 'FIM';
+                } else {
+                    // Todas as outras casas têm perguntas V/F
+                    square.classList.add('vf');
+                    charIcon = '🎯';
+                    labelText = 'V/F';
+                }
+
+                const character = document.createElement('div');
+                character.className = 'square-character';
+                character.textContent = charIcon;
+                const label = document.createElement('div');
+                label.className = 'square-number';
+                label.textContent = labelText;
                 square.appendChild(character);
                 square.appendChild(label);
 
                 if (i === 1) {
-                    const player1 = document.createElement('div'); player1.className = 'player player1'; player1.textContent = '1'; square.appendChild(player1);
-                    const player2 = document.createElement('div'); player2.className = 'player player2'; player2.textContent = '2'; square.appendChild(player2);
+                    const player1 = document.createElement('div');
+                    player1.className = 'player player1';
+                    player1.textContent = '1';
+                    square.appendChild(player1);
+                    
+                    const player2 = document.createElement('div');
+                    player2.className = 'player player2';
+                    player2.textContent = '2';
+                    square.appendChild(player2);
                 }
+                
                 board.appendChild(square);
             }
         }
 
+        // Girar a roleta
         function spinRoulette() {
             if (gameState.gameEnded || gameState.isSpinning) return;
             
@@ -1229,6 +1265,7 @@
             }, 2000);
         }
 
+        // Mover o jogador
         function movePlayer(steps) {
             const player = gameState.players[gameState.currentPlayer];
             const oldPosition = player.position;
@@ -1237,7 +1274,9 @@
             
             const currentSquare = document.getElementById(`square-${oldPosition}`);
             const playerElement = currentSquare.querySelector(`.player.player${gameState.currentPlayer}`);
-            if (playerElement) { playerElement.remove(); }
+            if (playerElement) { 
+                playerElement.remove(); 
+            }
             
             const newSquare = document.getElementById(`square-${player.position}`);
             const newPlayer = document.createElement('div');
@@ -1258,19 +1297,70 @@
                 return;
             }
 
+            // Todas as casas (exceto a primeira) têm perguntas
             if (player.position > 1) {
+                // Primeiro mostra o personagem da casa
                 setTimeout(() => {
                     showCharacterForHouse(player.position);
                 }, 500);
                 
+                // Depois mostra a pergunta
                 setTimeout(() => {
                     showQuestion();
                 }, 2500);
             } else {
-                setTimeout(nextPlayer, 1000);
+                setTimeout(() => {
+                    nextPlayer();
+                }, 1000);
             }
 
             updatePlayerDisplay();
+        }
+
+        function nextPlayer() {
+            gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+            updatePlayerDisplay();
+            
+            showInlineMessage(`Vez do Jogador ${gameState.currentPlayer}! 🎲`);
+        }
+
+        function updatePlayerDisplay() {
+            const player1Stats = document.getElementById('player1Stats');
+            const player2Stats = document.getElementById('player2Stats');
+            
+            if (player1Stats) {
+                const p1 = gameState.players[1];
+                player1Stats.innerHTML = `
+                    <div class="player-name ${gameState.currentPlayer === 1 ? 'active' : ''}">
+                        Jogador 1 - Casa ${p1.position}
+                    </div>
+                    <div class="player-coins">🪙 ${p1.coins}</div>
+                    <div class="player-bombs">💣 ${p1.bombs}</div>
+                `;
+                
+                if (gameState.currentPlayer === 1) {
+                    player1Stats.classList.add('active');
+                } else {
+                    player1Stats.classList.remove('active');
+                }
+            }
+            
+            if (player2Stats) {
+                const p2 = gameState.players[2];
+                player2Stats.innerHTML = `
+                    <div class="player-name ${gameState.currentPlayer === 2 ? 'active' : ''}">
+                        Jogador 2 - Casa ${p2.position}
+                    </div>
+                    <div class="player-coins">🪙 ${p2.coins}</div>
+                    <div class="player-bombs">💣 ${p2.bombs}</div>
+                `;
+                
+                if (gameState.currentPlayer === 2) {
+                    player2Stats.classList.add('active');
+                } else {
+                    player2Stats.classList.remove('active');
+                }
+            }
         }
 
         function showQuestion() {
@@ -1301,20 +1391,15 @@
             }, 2000);
         }
 
-        function nextPlayer() {
-            gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
-            updatePlayerDisplay();
-            
-            showInlineMessage(`Vez do Jogador ${gameState.currentPlayer}! 🎲`);
-        }
-
         function showCoinAnimation() {
             const coinElement = document.createElement('div');
             coinElement.className = 'coin-animation';
             coinElement.textContent = '🪙';
             document.body.appendChild(coinElement);
             
-            setTimeout(() => { document.body.removeChild(coinElement); }, 1000);
+            setTimeout(() => {
+                document.body.removeChild(coinElement);
+            }, 1000);
         }
 
         function showBombAnimation() {
@@ -1323,7 +1408,9 @@
             bombElement.textContent = '💥';
             document.body.appendChild(bombElement);
             
-            setTimeout(() => { document.body.removeChild(bombElement); }, 1000);
+            setTimeout(() => {
+                document.body.removeChild(bombElement);
+            }, 1000);
         }
 
         function showGameEnd() {
@@ -1333,11 +1420,12 @@
             
             setTimeout(() => {
                 showInlineMessage(`🏆 Jogador ${winner} VENCEU! 🎉\n\n🪙 Moedas: ${winnerData.coins}\n💣 Bombas: ${winnerData.bombs}`);
-                playAudio(sfxWin, 1.0);
                 
                 setTimeout(() => {
                     const restart = confirm(`Jogador ${winner} chegou ao fim!\n\nDeseja jogar novamente?`);
-                    if (restart) { restartGame(); }
+                    if (restart) {
+                        restartGame();
+                    }
                 }, 3000);
             }, 500);
         }
@@ -1346,46 +1434,100 @@
             gameState = {
                 currentPlayer: 1,
                 gameEnded: false,
-                players: { 1: { position: 1, coins: 0, bombs: 0 }, 2: { position: 1, coins: 0, bombs: 0 } },
+                players: {
+                    1: { position: 1, coins: 0, bombs: 0 },
+                    2: { position: 1, coins: 0, bombs: 0 }
+                },
                 questionsAnswered: 0,
-                isSpinning: false, currentRotation: 0
+                isSpinning: false,
+                currentRotation: 0
             };
+            
             updatePlayerDisplay();
             initializeBoard();
+            
             document.getElementById('rouletteResult').textContent = '?';
         }
 
-        // --- INICIALIZAÇÃO FINAL ---
+        // --- INICIALIZAÇÃO DO JOGO ---
         function initializeFullGame() {
+            console.log("Tabuleiro educativo inicializado!");
             initializeBoard();
             updatePlayerDisplay();
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Garante que o Game Container está escondido no início
-            document.getElementById('gameContainer').style.display = 'none';
+        // --- CONFIGURAÇÃO DO ELEMENT SDK ---
+        async function render(config) {
+            const videoTitle = config.video_title || defaultConfig.video_title;
+            const videoSubtitle = config.video_subtitle || defaultConfig.video_subtitle;
+            const gameTitle = config.game_title || defaultConfig.game_title;
+            const instructionsText = config.instructions_text || defaultConfig.instructions_text;
 
-            // Configuração da Splash Screen
-            document.getElementById('startButton').addEventListener('click', startGame);
-            document.getElementById('introVideo').addEventListener('click', () => {
-                // Desmuta o vídeo ao clicar
-                document.getElementById('introVideo').muted = false;
-                // Desmuta o jogo se estiver mutado
-                if (isMuted) {
-                    toggleMute();
-                }
-            });
+            const titleElement = document.querySelector('.video-title');
+            const subtitleElement = document.querySelector('.video-subtitle');
             
-            // Renderização do SDK (mantida)
-            // ...
+            if (titleElement) titleElement.textContent = videoTitle;
+            if (subtitleElement) subtitleElement.textContent = videoSubtitle;
+            
+            document.getElementById('gameTitle').textContent = gameTitle;
+            document.getElementById('instructionsText').textContent = instructionsText;
+        }
+
+        function mapToCapabilities(config) {
+            return {
+                recolorables: [
+                    {
+                        get: () => config.primary_color || '#667eea',
+                        set: (value) => {
+                            config.primary_color = value;
+                            if (window.elementSdk) {
+                                window.elementSdk.setConfig({ primary_color: value });
+                            }
+                        }
+                    }
+                ],
+                borderables: [],
+                fontEditable: {
+                    get: () => config.font_family || 'Segoe UI',
+                    set: (value) => {
+                        config.font_family = value;
+                        if (window.elementSdk) {
+                            window.elementSdk.setConfig({ font_family: value });
+                        }
+                    }
+                },
+                fontSizeable: {
+                    get: () => config.font_size || 16,
+                    set: (value) => {
+                        config.font_size = value;
+                        if (window.elementSdk) {
+                            window.elementSdk.setConfig({ font_size: value });
+                        }
+                    }
+                }
+            };
+        }
+
+        function mapToEditPanelValues(config) {
+            return new Map([
+                ["video_title", config.video_title || defaultConfig.video_title],
+                ["video_subtitle", config.video_subtitle || defaultConfig.video_subtitle],
+                ["game_title", config.game_title || defaultConfig.game_title],
+                ["instructions_text", config.instructions_text || defaultConfig.instructions_text]
+            ]);
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.elementSdk) {
+                window.elementSdk.init({
+                    defaultConfig,
+                    render,
+                    mapToCapabilities,
+                    mapToEditPanelValues
+                });
+            }
         });
-        
-        // Funções do Element SDK (mantidas para compatibilidade)
-        async function render(config) { /* ... */ }
-        function mapToCapabilities(config) { /* ... */ }
-        function mapToEditPanelValues(config) { /* ... */ }
-        // Fim das funções do Element SDK
-        
     </script>
  </body>
 </html>
