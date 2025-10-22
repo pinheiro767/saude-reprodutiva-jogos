@@ -6,13 +6,773 @@
   <title>Tabuleiro Imersivo - Educação Sexual</title>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
   <style>
-        /* [Seu CSS original completo deve ser inserido aqui. Apenas as alterações e adições relevantes estão listadas abaixo] */
+        /* [SEU CSS COMPLETO DEVE SER INSERIDO AQUI. É o CSS do prompt anterior + ajustes.] */
         body {
-            /* ... (Seu CSS original de fundo) ... */
+            box-sizing: border-box;
+            margin: 0;
+            padding: 20px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: transparent;
+            min-height: 100%;
+            color: #333;
+            overflow-x: auto;
+            position: relative;
         }
 
-        /* Adicionando estilos para a Splash Screen e o vídeo */
+        .bubbles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .bubble:nth-child(1) {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .bubble:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            left: 20%;
+            animation-delay: 2s;
+        }
+
+        .bubble:nth-child(3) {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #45b7d1, #96c93d);
+            left: 35%;
+            animation-delay: 4s;
+        }
+
+        .bubble:nth-child(4) {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #96ceb4, #feca57);
+            left: 50%;
+            animation-delay: 0s;
+        }
+
+        .bubble:nth-child(5) {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+            left: 70%;
+            animation-delay: 3s;
+        }
+
+        .bubble:nth-child(6) {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #ff9ff3, #667eea);
+            left: 80%;
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateY(-10vh) rotate(180deg);
+                opacity: 0.8;
+            }
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            font-size: 2.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .instructions {
+            font-size: 1.2rem;
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .players-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .player-card {
+            flex: 1;
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .player-card.active {
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            transform: scale(1.05);
+        }
+
+        .player-card.player2 {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+        }
+
+        .player-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .player-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 1.1rem;
+        }
+
+        .coins {
+            color: #ffd700;
+        }
+
+        .bombs {
+            color: #ff6b6b;
+        }
+
+        .board-container {
+            position: relative;
+            margin: 30px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            overflow: visible;
+            min-height: 700px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 15px;
+            background: transparent;
+            padding: 40px;
+            border-radius: 50%;
+            width: 600px;
+            height: 600px;
+            position: relative;
+            justify-content: center;
+            align-items: center;
+            overflow: visible;
+            contain: layout;
+        }
+
+        .square {
+            width: 80px;
+            height: 100px;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: absolute;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            animation: float-gentle 3s ease-in-out infinite;
+            overflow: visible;
+            background: white;
+        }
+
+        .character-card {
+            position: absolute;
+            top: -100px; /* Ajuste na posição */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px; /* Ajuste no tamanho */
+            height: 180px; /* Ajuste no tamanho */
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            border: 3px solid #4299e1;
+            animation: cardAppear 0.5s ease-out;
+            pointer-events: none;
+        }
+
+        .character-card.show {
+            display: flex;
+        }
+
+        .character-card.happy {
+            border-color: #48bb78;
+            background: linear-gradient(135deg, #f0fff4, #c6f6d5);
+        }
+
+        .character-card.sad {
+            border-color: #e53e3e;
+            background: linear-gradient(135deg, #fff5f5, #fed7d7);
+        }
+
+        @keyframes cardAppear {
+            0% {
+                transform: translateX(-50%) scale(0) rotate(180deg);
+                opacity: 0;
+            }
+            100% {
+                transform: translateX(-50%) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .character-avatar {
+            width: 80px; /* Ajuste na largura */
+            height: 80px; /* Ajuste na altura */
+            border-radius: 50%;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0; /* Esconde o emoji */
+            background-size: cover; /* Garantindo que a imagem cubra */
+            background-position: center;
+            background-color: transparent !important; 
+            border: 3px solid white;
+            transition: all 0.3s ease;
+        }
+
+        .character-avatar.happy {
+            border-color: #48bb78;
+            animation: bounce 0.6s ease-in-out;
+        }
+
+        .character-avatar.sad {
+            border-color: #e53e3e;
+            animation: shake 0.6s ease-in-out;
+        }
+        
+        /* ... (Resto do seu CSS, incluindo explosão, shake, modal, etc.) */
+
+        .explosion-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,69,0,0.8) 0%, rgba(255,140,0,0.6) 30%, rgba(255,215,0,0.4) 60%, transparent 100%);
+            z-index: 2000;
+            display: none;
+            animation: explode 1.5s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            20% {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+
+        .explosion-particles {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            pointer-events: none;
+            z-index: 2001;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ff4500;
+            border-radius: 50%;
+            animation: particle-explosion 1.5s ease-out forwards;
+        }
+
+        @keyframes particle-explosion {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--end-x, 100px), var(--end-y, 100px)) scale(0);
+            }
+        }
+
+        .screen-shake {
+            animation: screen-shake 0.8s ease-in-out;
+        }
+
+        @keyframes screen-shake {
+            0%, 100% { transform: translateX(0); }
+            10% { transform: translateX(-10px) translateY(-5px); }
+            20% { transform: translateX(10px) translateY(5px); }
+            30% { transform: translateX(-8px) translateY(-3px); }
+            40% { transform: translateX(8px) translateY(3px); }
+            50% { transform: translateX(-6px) translateY(-2px); }
+            60% { transform: translateX(6px) translateY(2px); }
+            70% { transform: translateX(-4px) translateY(-1px); }
+            80% { transform: translateX(4px) translateY(1px); }
+            90% { transform: translateX(-2px); }
+        }
+
+        .character-message {
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-align: center;
+            color: #4a5568;
+            margin-top: 5px;
+        }
+
+        .character-message.happy {
+            color: #2f855a;
+        }
+
+        .character-message.sad {
+            color: #c53030;
+        }
+
+        .square:hover {
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            border-color: rgba(255, 215, 0, 0.8);
+        }
+
+        .square-character {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .square-number {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #4a5568;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-top: 2px;
+        }
+
+        @keyframes float-gentle {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .square.normal {
+            background: linear-gradient(135deg, #e8f5e8, #c6f6d5);
+            border-color: rgba(72, 187, 120, 0.8);
+        }
+
+        .square.vf {
+            background: linear-gradient(135deg, #fff5e6, #fed7aa);
+            border-color: rgba(237, 137, 54, 0.8);
+        }
+
+        .square.start {
+            background: linear-gradient(135deg, #e6f3ff, #bee3f8);
+            border-color: rgba(66, 153, 225, 0.8);
+            width: 90px;
+            height: 110px;
+        }
+
+        .square.finish {
+            background: linear-gradient(135deg, #f0e6ff, #e9d8fd);
+            border-color: rgba(159, 122, 234, 0.8);
+            width: 90px;
+            height: 110px;
+            animation: pulse-float 2s infinite, float-gentle 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-float {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(159, 122, 234, 0.7);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 0 15px rgba(159, 122, 234, 0);
+                transform: scale(1.1);
+            }
+        }
+
+        .player {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            top: -10px;
+            z-index: 10;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .player.player1 {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            right: -10px;
+        }
+
+        .player.player2 {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            right: -30px;
+        }
+
+        .roulette-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .roulette {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #ff6b6b 0deg 60deg,
+                #4ecdc4 60deg 120deg,
+                #45b7d1 120deg 180deg,
+                #96ceb4 180deg 240deg,
+                #feca57 240deg 300deg,
+                #ff9ff3 300deg 360deg
+            );
+            border: 8px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .roulette:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+        }
+
+        .roulette.spinning {
+            animation: spin 2s ease-out;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(1800deg); }
+        }
+
+        .roulette-center {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4a5568;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .roulette-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ffd700;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .turn-indicator {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #edf2f7, #e2e8f0);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .winner-announcement {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #2d3748;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            box-shadow: 0 8px 16px rgba(255, 215, 0, 0.3);
+            animation: celebration 1s ease-in-out;
+        }
+
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal h3 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .modal p {
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #718096;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+            transform: translateY(-2px);
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #cbd5e0;
+        }
+
+        .vf-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-true {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-true:hover {
+            background: #38a169;
+        }
+
+        .btn-false {
+            background: #e53e3e;
+            color: white;
+        }
+
+        .btn-false:hover {
+            background: #c53030;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .board {
+                grid-template-columns: repeat(6, 1fr);
+                gap: 6px;
+                padding: 15px;
+            }
+            
+            .square {
+                font-size: 0.8rem;
+                padding: 3px;
+            }
+            
+            .dice {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Estilos da Splash Screen */
         #splashScreen {
             position: fixed;
             top: 0;
@@ -48,37 +808,8 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             transition: all 0.3s ease;
         }
-
-        /* Novas regras para a imagem do personagem */
-        .character-avatar {
-            /* Removendo estilos de cor e ícone para usar a imagem */
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-size: cover;
-            background-position: center;
-            /* Garantindo que as imagens cobrem o círculo */
-            background-color: transparent !important; 
-            border: 3px solid white;
-            font-size: 0; /* Esconde o emoji de fallback */
-        }
-
-        .character-card.happy .character-avatar {
-            border-color: #48bb78;
-        }
         
-        .character-card.sad .character-avatar {
-            border-color: #e53e3e;
-        }
-
-        .character-card {
-            /* Ajuste o tamanho do card se necessário para a nova proporção da imagem */
-            width: 150px;
-            height: 180px;
-            top: -100px; /* Posição ajustada */
-        }
-        
-        /* Adicionando um botão de mudo */
+        /* Botão de Mudo */
         #muteButton {
             position: fixed;
             bottom: 20px;
@@ -116,6 +847,7 @@
    <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div><div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
   </div><div class="explosion-overlay" id="explosionOverlay"></div>
   <div class="explosion-particles" id="explosionParticles"></div>
+  
   <div class="game-container" style="display: none;" id="mainGameContainer">
    <div class="game-header">
     <h1 class="game-title" id="gameTitle">Tabuleiro Imersivo - Educação Sexual</h1>
@@ -149,7 +881,7 @@
       <div class="roulette-pointer"></div>
       <div class="roulette-center" id="rouletteResult">🎯</div>
      </div>
-     <div style="text-align: center; color: #fff; font-weight: bold;">Clique para girar!</div>
+     <div style="text-align: center; color: white; font-weight: bold;">Clique para girar!</div>
     </div>
    </div>
    <div class="legend">
@@ -174,557 +906,100 @@
   
   <button id="muteButton" onclick="toggleMute()">🔇</button>
   
+  <script src="src/js/game.js"></script>
+  
   <script>
-        // Mapeamento das imagens personalizadas (com caminhos atualizados)
-        const CHARACTER_IMAGES = {
-            'girl_default': 'assets/img/3.jpg',
-            'girl_question': 'assets/img/2.jpg',
-            'girl_win': 'assets/img/5.jpg',
-            'girl_lose': 'assets/img/6.jpg',
-            'boy_default': 'assets/img/4.jpg', // Usando YES! como default do boy
-            'boy_question': 'assets/img/7.jpg',
-            'boy_win': 'assets/img/4.jpg',
-            'boy_lose': 'assets/img/7.jpg'
-        };
+    // Mapeamento das imagens personalizadas (repetido aqui para garantir que o JS tenha os dados)
+    const CHARACTER_IMAGES = {
+        'girl_default': 'assets/img/3.jpg',
+        'girl_question': 'assets/img/2.jpg',
+        'girl_win': 'assets/img/5.jpg',
+        'girl_lose': 'assets/img/6.jpg',
+        'boy_default': 'assets/img/4.jpg', 
+        'boy_question': 'assets/img/7.jpg',
+        'boy_win': 'assets/img/4.jpg',
+        'boy_lose': 'assets/img/7.jpg'
+    };
 
-        // Estado e Áudio
-        let gameState = {
-            currentPlayer: 1,
-            players: {
-                1: { position: 1, coins: 0, bombs: 0 },
-                2: { position: 1, coins: 0, bombs: 0 }
-            },
-            gameEnded: false
-        };
-        let currentQuestion = null;
-        let currentQuestionType = null;
-        let isMuted = true;
+    // Estado e Áudio (Essas variáveis devem ser definidas em game.js, mas mantidas no HTML para evitar erros de referência se game.js não for carregado)
+    let gameState = {
+        currentPlayer: 1,
+        players: {
+            1: { position: 1, coins: 0, bombs: 0 },
+            2: { position: 1, coins: 0, bombs: 0 }
+        },
+        gameEnded: false
+    };
+    let isMuted = true;
+    const bgm = document.getElementById('bgm');
+    const sfxCoin = document.getElementById('sfxCoin');
+    const sfxError = document.getElementById('sfxError');
+    const sfxWin = document.getElementById('sfxWin');
 
-        const bgm = document.getElementById('bgm');
-        const sfxCoin = document.getElementById('sfxCoin');
-        const sfxError = document.getElementById('sfxError');
-        const sfxWin = document.getElementById('sfxWin');
+    // Funções de controle que precisam estar no escopo global
+    function playAudio(audioElement, volume = 1.0) { if (isMuted) return; audioElement.currentTime = 0; audioElement.volume = volume; audioElement.play().catch(e => console.log("Erro ao tocar áudio:", e)); }
+    function toggleMute() { 
+        isMuted = !isMuted; 
+        document.getElementById('muteButton').textContent = isMuted ? '🔇' : '🔊';
+        bgm.muted = isMuted; sfxCoin.muted = isMuted; sfxError.muted = isMuted; sfxWin.muted = isMuted;
+        if (!isMuted && bgm.paused) { bgm.play().catch(e => console.log("Erro ao iniciar BGM:", e)); }
+    }
+    
+    // Função START GAME CORRIGIDA
+    function startGame() {
+        const splashScreen = document.getElementById('splashScreen');
+        const mainGameContainer = document.getElementById('mainGameContainer');
+        const introVideo = document.getElementById('introVideo');
 
-        function playAudio(audioElement, volume = 1.0) {
-            if (isMuted) return;
-            audioElement.currentTime = 0;
-            audioElement.volume = volume;
-            audioElement.play().catch(e => console.log("Erro ao tocar áudio:", e));
-        }
+        // Oculta a tela de introdução com transição
+        splashScreen.style.opacity = '0';
+        introVideo.pause();
 
-        function toggleMute() {
-            isMuted = !isMuted;
-            document.getElementById('muteButton').textContent = isMuted ? '🔇' : '🔊';
+        setTimeout(() => {
+            splashScreen.style.display = 'none';
             
-            bgm.muted = isMuted;
-            sfxCoin.muted = isMuted;
-            sfxError.muted = isMuted;
-            sfxWin.muted = isMuted;
+            // EXIBE O CONTÊINER PRINCIPAL
+            mainGameContainer.style.display = 'block';
 
-            if (!isMuted && bgm.paused) {
+            // Tenta iniciar a música
+            if (!isMuted) {
                 bgm.play().catch(e => console.log("Erro ao iniciar BGM:", e));
             }
-        }
-        
-        // Função de Início do Jogo
-        function startGame() {
-            document.getElementById('splashScreen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('splashScreen').style.display = 'none';
-                document.getElementById('mainGameContainer').style.display = 'block';
-                document.getElementById('introVideo').pause();
-                // Tenta iniciar a música
-                if (!isMuted) {
-                    bgm.play().catch(e => console.log("Erro ao iniciar BGM:", e));
-                }
-            }, 500);
-        }
 
-        // --- FUNÇÕES DE PERSONAGEM E REAÇÃO ---
-
-        // Configura o visual do avatar baseado no estado
-        function setAvatarImage(avatarElement, type, state) {
-            const isGirl = type === 'girl';
-            let imageKey = `${isGirl ? 'girl' : 'boy'}_${state}`;
-            
-            // Lógica para determinar a imagem correta
-            if (state === 'default') {
-                 imageKey = isGirl ? 'girl_default' : 'boy_default';
-            } else if (state === 'question') {
-                 imageKey = isGirl ? 'girl_question' : 'boy_question';
-            } else if (state === 'win') {
-                 imageKey = isGirl ? 'girl_win' : 'boy_win';
-            } else if (state === 'lose') {
-                 imageKey = isGirl ? 'girl_lose' : 'boy_lose';
-            }
-
-            avatarElement.style.backgroundImage = `url(${CHARACTER_IMAGES[imageKey]})`;
-        }
-
-        // Mostrar card do personagem
-        function showCharacterCard(position, isQuestion = true) {
-            const square = document.getElementById(`square-${position}`);
-            const characterCard = square.querySelector('.character-card');
-            
-            if (characterCard) {
-                characterCard.classList.add('show');
-                const avatar = characterCard.querySelector('.character-avatar');
-                const isGirl = position % 2 === 0;
-
-                setAvatarImage(avatar, isGirl ? 'girl' : 'boy', isQuestion ? 'question' : 'default');
-            }
-        }
-
-        // Atualizar reação do personagem
-        function updateCharacterReaction(position, isCorrect) {
-            const square = document.getElementById(`square-${position}`);
-            const characterCard = square.querySelector('.character-card');
-            if (characterCard) {
-                const avatar = characterCard.querySelector('.character-avatar');
-                const message = characterCard.querySelector('.character-message');
-                const isGirl = position % 2 === 0;
-                const type = isGirl ? 'girl' : 'boy';
-
-                characterCard.classList.remove('happy', 'sad');
-                avatar.classList.remove('happy', 'sad');
-                message.classList.remove('happy', 'sad');
-                
-                if (isCorrect) {
-                    characterCard.classList.add('happy');
-                    avatar.classList.add('happy');
-                    message.classList.add('happy');
-                    message.textContent = 'Parabéns! 😊';
-                    setAvatarImage(avatar, type, 'win');
-                } else {
-                    characterCard.classList.add('sad');
-                    avatar.classList.add('sad');
-                    message.classList.add('sad');
-                    message.textContent = 'Que pena! 😔';
-                    setAvatarImage(avatar, type, 'lose');
-                }
-                
-                characterCard.classList.add('show');
-                
-                // Resetar para estado neutro após 3 segundos
-                setTimeout(() => {
-                    characterCard.classList.remove('happy', 'sad');
-                    avatar.classList.remove('happy', 'sad');
-                    message.classList.remove('happy', 'sad');
-                    message.textContent = 'Boa sorte!';
-                    setAvatarImage(avatar, type, 'default');
-                }, 3000);
-            }
-        }
-
-        // --- LÓGICA DO TABULEIRO E PERGUNTAS (Adaptada) ---
-        
-        // Inicializar o tabuleiro
-        function initializeBoard() {
-            const board = document.getElementById('gameBoard');
-            board.innerHTML = '';
-
-            const radius = 250; 
-            const centerX = 300; 
-            const centerY = 300; 
-
-            for (let i = 1; i <= 40; i++) {
-                const square = document.createElement('div');
-                square.className = 'square';
-                square.id = `square-${i}`;
-                
-                // Calcular posição em círculo
-                const angle = ((i - 1) / 40) * 2 * Math.PI - Math.PI / 2;
-                const x = centerX + radius * Math.cos(angle);
-                const y = centerY + radius * Math.sin(angle);
-                
-                square.style.left = `${x - 40}px`; 
-                square.style.top = `${y - 50}px`; 
-                square.style.animationDelay = `${i * 0.1}s`; 
-                
-                let isGirl = i % 2 === 0;
-                let charIcon = isGirl ? '👧' : '👦';
-
-                if (i === 1) {
-                    square.classList.add('start');
-                    charIcon = '🚀';
-                } else if (i === 40) {
-                    square.classList.add('finish');
-                    charIcon = '🏆';
-                } else if (i % 5 === 0 || i % 7 === 0) {
-                    square.classList.add('vf');
-                } else {
-                    square.classList.add('normal');
-                }
-
-                const character = document.createElement('div');
-                character.className = 'square-character';
-                character.textContent = charIcon;
-                const label = document.createElement('div');
-                label.className = 'square-number';
-                label.textContent = (i === 1) ? 'INÍCIO' : (i === 40) ? 'FIM' : (square.classList.contains('vf') ? 'V/F' : i);
-                square.appendChild(character);
-                square.appendChild(label);
-
-                // Adicionar card de reação para casas com perguntas
-                if (i !== 1 && i !== 40) {
-                    const characterCard = document.createElement('div');
-                    characterCard.className = 'character-card';
-                    characterCard.id = `character-${i}`;
-                    
-                    const avatar = document.createElement('div');
-                    avatar.className = 'character-avatar';
-                    
-                    // Inicializa a imagem default no avatar
-                    setAvatarImage(avatar, isGirl ? 'girl' : 'boy', 'default');
-                    
-                    const message = document.createElement('div');
-                    message.className = 'character-message';
-                    message.textContent = 'Boa sorte!';
-                    
-                    characterCard.appendChild(avatar);
-                    characterCard.appendChild(message);
-                    square.appendChild(characterCard);
-                    showCharacterCard(i, false); // Mostra o card neutro
-                }
-
-                // Adicionar jogadores nas posições iniciais
-                if (i === 1) {
-                    const player1 = document.createElement('div');
-                    player1.className = 'player player1';
-                    player1.textContent = '1';
-                    square.appendChild(player1);
-
-                    const player2 = document.createElement('div');
-                    player2.className = 'player player2';
-                    player2.textContent = '2';
-                    square.appendChild(player2);
-                }
-
-                board.appendChild(square);
-            }
-        }
-        
-        // ... (O restante das funções do jogo, como spinRoulette, movePlayer, checkVFAnswer, etc., deve ser mantido
-        //      e apenas a chamada aos áudios e reações de personagem precisa ser conferida.)
-
-        // Girar a roleta (Com áudio de movimento)
-        function spinRoulette() {
-            if (gameState.gameEnded) return;
-            
-            const roulette = document.getElementById('roulette');
-            const result = document.getElementById('rouletteResult');
-            
-            roulette.classList.add('spinning');
-            playAudio(sfxCoin, 0.8); // Usando sfxCoin para simular o som da roleta/dado
-            
-            setTimeout(() => {
-                const roll = Math.floor(Math.random() * 6) + 1;
-                result.textContent = roll;
-                roulette.classList.remove('spinning');
-                
-                movePlayer(roll);
-            }, 2000);
-        }
-
-        // Mover o jogador (Sem alterações na lógica)
-        function movePlayer(steps) {
-            const player = gameState.players[gameState.currentPlayer];
-            const oldPosition = player.position;
-            
-            const currentSquare = document.getElementById(`square-${oldPosition}`);
-            const playerElement = currentSquare.querySelector(`.player.player${gameState.currentPlayer}`);
-            if (playerElement) {
-                playerElement.remove();
-            }
-
-            player.position = Math.min(player.position + steps, 40);
-            
-            const newSquare = document.getElementById(`square-${player.position}`);
-            const newPlayer = document.createElement('div');
-            newPlayer.className = `player player${gameState.currentPlayer}`;
-            newPlayer.textContent = gameState.currentPlayer;
-            newPlayer.style.transform = 'scale(0)';
-            newSquare.appendChild(newPlayer);
-            
-            setTimeout(() => {
-                newPlayer.style.transform = 'scale(1)';
-                newPlayer.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-            }, 100);
-
-            updatePlayerDisplay();
-
-            if (player.position === 40) {
-                gameState.gameEnded = true;
-                const playerName = gameState.currentPlayer === 1 ? 
-                    (document.getElementById('player1Name').textContent || 'Jogador 1') :
-                    (document.getElementById('player2Name').textContent || 'Jogador 2');
-                
-                setTimeout(() => {
-                    showWinner(playerName);
-                    playAudio(sfxWin, 1.0); // Som de vitória
-                }, 500);
-                return;
-            }
-
-            setTimeout(() => {
-                const square = document.getElementById(`square-${player.position}`);
-                if (square.classList.contains('vf')) {
-                    showCharacterCard(player.position, true); // Mostra personagem perguntando
-                    showVFQuestion();
-                } else if (square.classList.contains('normal')) {
-                    showCharacterCard(player.position, true); // Mostra personagem perguntando
-                    showInformativeQuestion();
-                }
-            }, 500);
-        }
-        
-        // Mostrar vencedor
-        function showWinner(playerName) {
-            const winnerDiv = document.createElement('div');
-            winnerDiv.className = 'winner-announcement';
-            winnerDiv.innerHTML = `🎉 ${playerName} VENCEU! 🎉<br>Parabéns por completar o tabuleiro de educação sexual!`;
-            
-            const gameInfo = document.querySelector('.game-info');
-            gameInfo.appendChild(winnerDiv);
-
-            setTimeout(() => {
-                showCustomModal('🏆 Fim de Jogo!', `${playerName} chegou primeiro ao final! Parabéns por aprender sobre educação sexual de forma divertida!`, [
-                    {text: 'Jogar Novamente', action: () => { 
-                        gameState = { currentPlayer: 1, players: { 1: { position: 1, coins: 0, bombs: 0 }, 2: { position: 1, coins: 0, bombs: 0 } }, gameEnded: false };
-                        initializeBoard(); updatePlayerDisplay(); winnerDiv.remove(); closeModal(); 
-                    }}
-                ]);
-            }, 2000);
-        }
-
-        // Verificar resposta V/F
-        function checkVFAnswer(answer) {
-            const isCorrect = answer === currentQuestion.resposta_correta;
-            const player = gameState.players[gameState.currentPlayer];
-            
-            // Atualizar reação do personagem (com imagem correta)
-            updateCharacterReaction(player.position, isCorrect);
-            
-            if (isCorrect) {
-                player.coins++;
-                document.getElementById('answerTitle').textContent = '✅ Correto! +1 Moeda';
-                playAudio(sfxCoin, 0.5); // Som de moeda
+            // Inicializa o tabuleiro (função definida em game.js)
+            if (typeof initializeBoard === 'function') {
+                initializeBoard();
             } else {
-                player.bombs++;
-                document.getElementById('answerTitle').textContent = '❌ Incorreto! +1 Bomba';
-                
-                setTimeout(() => {
-                    createExplosion();
-                    playAudio(sfxError, 1.0); // Som de erro
-                }, 500);
+                 console.error("Função initializeBoard não encontrada. Verifique game.js.");
             }
             
-            document.getElementById('answerText').textContent = currentQuestion.explicacao;
-            updatePlayerDisplay();
-            
-            document.getElementById('questionModal').style.display = 'none';
-            document.getElementById('answerModal').style.display = 'flex';
+        }, 500); // Aguarda o fim da transição de 0.5s
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializa o display do jogo (mas não desenha o tabuleiro até startGame)
+        if (typeof updatePlayerDisplay === 'function') {
+             updatePlayerDisplay();
         }
         
-        // ... (as outras funções que não tiveram mudanças diretas com os assets, como showInformativeQuestion, showVFQuestion, closeModal, etc. são mantidas)
-        // ...
-
-        // PERGUNTAS (MANTIDAS)
-        const perguntasInformativas = [
-            {"pergunta": "É seguro rasgar a embalagem do preservativo com os dentes para ser mais rápido.", "resposta_correta": "F", "explicacao": "FALSO. Rasgar com os dentes ou unhas pode causar microfuros invisíveis que anulam a proteção. Sempre use os dedos para rasgar na borda serrilhada. Guarde em locais frescos, longe do calor."},
-            {"pergunta": "Se colocar o preservativo do lado errado e ele tocar no pênis, posso virá-lo e usar normalmente.", "resposta_correta": "F", "explicacao": "FALSO. Se começou do lado errado e tocou no pênis, jogue fora e pegue outro! Fluidos pré-ejaculatórios podem ter entrado em contato com a parte interna."},
-            {"pergunta": "É importante apertar a pontinha do preservativo antes de desenrolar para tirar o ar.", "resposta_correta": "V", "explicacao": "VERDADEIRO. A pontinha é o reservatório do esperma. Se não tirar o ar, a pressão na ejaculação pode estourar o preservativo."},
-            {"pergunta": "O preservativo protege mesmo se não desenrolar até a base do pênis.", "resposta_correta": "F", "explicacao": "FALSO. Deve desenrolar completamente até a base. É ali que a borda forma uma 'barreira' que ajuda a prender o esperma e manter a proteção."},
-            {"pergunta": "Posso retirar o preservativo a qualquer momento após a ejaculação sem cuidados especiais.", "resposta_correta": "F", "explicacao": "FALSO. Deve ser rápido e cuidadoso imediatamente após a ejaculação, antes do pênis amolecer. Segure a borda na base e retire devagar."},
-            {"pergunta": "O preservativo feminino pode ser colocado horas antes da relação sexual.", "resposta_correta": "V", "explicacao": "VERDADEIRO. Esta é uma grande vantagem! Pode ser colocado com antecedência, tirando a pressão do momento e garantindo que a proteção já está pronta."},
-            {"pergunta": "É normal o preservativo feminino ficar frouxo ou torcido dentro do canal vaginal.", "resposta_correta": "V", "explicacao": "VERDADEIRO. Essa folga é normal e permite que ele se ajuste durante a relação. O importante é que o anel menor esteja bem fundo e o maior cubra a entrada."},
-            {"pergunta": "Posso usar preservativo masculino e feminino ao mesmo tempo para maior proteção.", "resposta_correta": "F", "explicacao": "FALSO. NUNCA use os dois juntos! O atrito entre os materiais pode rasgar ambos os preservativos. Escolha apenas um."},
-            {"pergunta": "O diafragma é considerado um método contraceptivo de barreira.", "resposta_correta": "V", "explicacao": "VERDADEIRO. O diafragma (usado com espermicida) e os preservativos são exemplos de métodos de barreira que impedem fisicamente a passagem dos espermatozoides."},
-            {"pergunta": "A pílula do dia seguinte pode ser usada como método contraceptivo regular.", "resposta_correta": "F", "explicacao": "FALSO. É apenas para emergências. Usar regularmente causa desequilíbrios hormonais e é menos eficaz que métodos contraceptivos regulares."},
-            {"pergunta": "O preservativo protege contra todas as IST sem exceção.", "resposta_correta": "F", "explicacao": "FALSO. Protege contra a maioria, mas IST como HPV e Herpes podem ser transmitidas pelo contato com áreas da pele não cobertas pelo preservativo."},
-            {"pergunta": "O duche vaginal após a relação é eficaz para prevenir gravidez e IST.", "resposta_correta": "F", "explicacao": "FALSO. O duche pode empurrar bactérias para dentro do útero e desequilibra a flora vaginal, aumentando o risco de infecções."},
-            {"pergunta": "O preservativo é o único método que oferece dupla proteção: contra gravidez e IST.", "resposta_correta": "V", "explicacao": "VERDADEIRO. É o único método contraceptivo que também oferece proteção contra a maioria das Infecções Sexualmente Transmissíveis."},
-            {"pergunta": "O consentimento dado no início da relação vale para toda a atividade sexual.", "resposta_correta": "F", "explicacao": "FALSO. O consentimento deve ser contínuo e pode ser retirado a qualquer momento. Deve ser confirmado em cada etapa da atividade sexual."},
-            {"pergunta": "Libido e desejo sexual são exatamente a mesma coisa.", "resposta_correta": "F", "explicacao": "FALSO. Libido é o impulso sexual geral (o 'motor'), enquanto desejo sexual é a vontade específica de ter atividade sexual (a 'vontade de dirigir')."},
-            {"pergunta": "Sexting sem consentimento pode ter consequências legais graves.", "resposta_correta": "V", "explicacao": "VERDADEIRO. A distribuição não consensual de conteúdo íntimo (pornografia de vingança) é ilegal e pode ter graves consequências emocionais e legais."},
-            {"pergunta": "Orientação Sexual e Identidade de Gênero referem-se ao mesmo conceito.", "resposta_correta": "F", "explicacao": "FALSO. Orientação Sexual é sobre atração por outras pessoas. Identidade de Gênero é o sentido interno de ser homem, mulher, ambos, nenhum ou outro gênero."},
-            {"pergunta": "Uma pessoa sem sintomas visíveis de IST não pode ter nenhuma infecção.", "resposta_correta": "F", "explicacao": "FALSO. Muitas IST (como Clamídia e HPV) podem ser assintomáticas por muito tempo. Por isso são essenciais os testes regulares e o uso de preservativo."},
-            {"pergunta": "Lubrificantes à base de óleo são seguros com preservativos de látex.", "resposta_correta": "F", "explicacao": "FALSO. Óleos (vaselina, óleos de massagem) danificam o látex, tornando o preservativo menos eficaz. Use lubrificantes à base de água ou silicone."},
-            {"pergunta": "É impossível engravidar durante a menstruação.", "resposta_correta": "F", "explicacao": "FALSO. Embora menos provável, espermatozoides sobrevivem dias no corpo e a ovulação pode ocorrer mais cedo em alguns ciclos. Sempre use proteção se não deseja engravidar."}
-        ];
-
-        const perguntasRisco = [
-            {"pergunta": "Verdade ou Mito: Esquecer a pílula anticoncepcional num dia, mas tomá-la no dia seguinte, anula completamente o risco de gravidez.", "resposta_correta": "F", "explicacao": "FALSO. A eficácia da pílula depende da tomada correta e diária. Se você falhar um dia, a proteção pode ser reduzida, e métodos de proteção adicionais (como o preservativo) devem ser usados nos dias seguintes, conforme as indicações médicas."},
-            {"pergunta": "É seguro usar dois preservativos ao mesmo tempo para maior proteção.", "resposta_correta": "F", "explicacao": "FALSO. Usar dois preservativos aumenta o atrito entre eles, fazendo com que ambos se rasguem mais facilmente. Use sempre apenas um preservativo de cada vez."},
-            {"pergunta": "A pílula do dia seguinte pode ser usada como método contraceptivo regular.", "resposta_correta": "F", "explicacao": "FALSO. A pílula do dia seguinte é apenas para emergências. Usar regularmente pode causar desequilíbrios hormonais e é menos eficaz que métodos contraceptivos regulares."},
-            {"pergunta": "É possível engravidar mesmo usando preservativo corretamente.", "resposta_correta": "V", "explicacao": "VERDADEIRO. Nenhum método contraceptivo é 100% eficaz. O preservativo tem cerca de 98% de eficácia quando usado corretamente, mas ainda existe uma pequena possibilidade de falha."},
-            {"pergunta": "Toda IST apresenta sintomas visíveis.", "resposta_correta": "F", "explicacao": "FALSO. Muita IST (como Clamídia, HPV e HIV) pode ser assintomática por longos períodos. Por isso é importante fazer testes regulares e usar sempre preservativo."},
-            {"pergunta": "O preservativo protege contra toda IST.", "resposta_correta": "F", "explicacao": "FALSO. O preservativo protege contra a maioria das IST, mas algumas como HPV e Herpes podem ser transmitidas pelo contato com áreas da pele não cobertas pelo preservativo."},
-            {"pergunta": "Lubrificantes à base de óleo são seguros para usar com preservativos de látex.", "resposta_correta": "F", "explicacao": "FALSO. Lubrificantes à base de óleo (como vaselina ou óleos de massagem) podem danificar o látex do preservativo, tornando-o menos eficaz e mais propenso a rasgar. Use sempre lubrificantes à base de água ou silicone com preservativos de látex."},
-            {"pergunta": "É possível engravidar tendo relação sexual durante a menstruação.", "resposta_correta": "V", "explicacao": "VERDADEIRO. Embora a probabilidade seja menor, espermatozoides podem sobreviver por vários dias no corpo feminino, e a ovulação pode ocorrer mais cedo em alguns ciclos, levando à gravidez. Sempre use proteção se não deseja engravidar."},
-            {"pergunta": "IST é um problema de saúde apenas para pessoas sexualmente ativas com múltiplos parceiros.", "resposta_correta": "F", "explicacao": "FALSO. Qualquer pessoa sexualmente ativa pode contrair uma IST, independentemente do número de parceiros. O risco está na prática sexual desprotegida."},
-            {"pergunta": "O sexo anal é uma prática de baixo risco para a transmissão de IST em comparação com o sexo vaginal.", "resposta_correta": "F", "explicacao": "FALSO. O sexo anal é, na verdade, uma prática de alto risco para a transmissão de IST (incluindo o HIV) devido à maior fragilidade do tecido anal, que pode sofrer microlesões mais facilmente. O uso correto do preservativo e lubrificante é essencial."}
-        ];
+        // Configura o clique do botão de início
+        document.getElementById('startButton').addEventListener('click', startGame);
         
-        function showInformativeQuestion() {
-            const randomIndex = Math.floor(Math.random() * perguntasInformativas.length);
-            currentQuestion = perguntasInformativas[randomIndex];
-            currentQuestionType = 'informative';
-
-            document.getElementById('modalTitle').textContent = 'Verdadeiro ou Falso?';
-            document.getElementById('modalQuestion').textContent = currentQuestion.pergunta;
-            document.getElementById('modalButtons').innerHTML = `<div class="vf-buttons"><button class="btn btn-true" onclick="checkVFAnswer('V')">Verdadeiro</button><button class="btn btn-false" onclick="checkVFAnswer('F')">Falso</button></div>`;
-            document.getElementById('questionModal').style.display = 'flex';
-        }
-
-        function showVFQuestion() {
-            const randomIndex = Math.floor(Math.random() * perguntasRisco.length);
-            currentQuestion = perguntasRisco[randomIndex];
-            currentQuestionType = 'vf';
-
-            document.getElementById('modalTitle').textContent = 'Pergunta de Risco - V/F?';
-            document.getElementById('modalQuestion').textContent = currentQuestion.pergunta;
-            document.getElementById('modalButtons').innerHTML = `<div class="vf-buttons"><button class="btn btn-true" onclick="checkVFAnswer('V')">Verdadeiro</button><button class="btn btn-false" onclick="checkVFAnswer('F')">Falso</button></div>`;
-            document.getElementById('questionModal').style.display = 'flex';
-        }
-        
-        function updatePlayerDisplay() {
-            const player1 = gameState.players[1];
-            const player2 = gameState.players[2];
-            document.getElementById('player1Position').textContent = player1.position;
-            document.getElementById('player1Coins').textContent = player1.coins;
-            document.getElementById('player1Bombs').textContent = player1.bombs;
-            document.getElementById('player2Position').textContent = player2.position;
-            document.getElementById('player2Coins').textContent = player2.coins;
-            document.getElementById('player2Bombs').textContent = player2.bombs;
-
-            const player1Card = document.getElementById('player1Card');
-            const player2Card = document.getElementById('player2Card');
-            const turnIndicator = document.getElementById('turnIndicator');
-
-            if (gameState.currentPlayer === 1) {
-                player1Card.classList.add('active');
-                player2Card.classList.remove('active');
-                turnIndicator.textContent = `Vez do Jogador 1`;
-            } else {
-                player1Card.classList.remove('active');
-                player2Card.classList.add('active');
-                turnIndicator.textContent = `Vez do Jogador 2`;
+        // Controle de áudio do vídeo na splash screen
+        const introVideo = document.getElementById('introVideo');
+        introVideo.addEventListener('click', () => {
+            introVideo.muted = !introVideo.muted;
+            if (!introVideo.muted) {
+                // Se desmutar o vídeo, desmuta o jogo e toca o BGM
+                isMuted = false;
+                document.getElementById('muteButton').textContent = '🔊';
+                bgm.muted = false;
+                bgm.play().catch(e => console.log("Erro ao iniciar BGM:", e));
             }
-        }
-        
-        function closeModal() {
-            document.getElementById('questionModal').style.display = 'none';
-            document.getElementById('answerModal').style.display = 'none';
-            
-            if (!gameState.gameEnded) {
-                switchPlayer();
-            }
-        }
-        
-        function switchPlayer() {
-            gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
-            updatePlayerDisplay();
-        }
-        
-        function showCustomModal(title, message, buttons) {
-            document.getElementById('answerTitle').textContent = title;
-            document.getElementById('answerText').textContent = message;
-            
-            const buttonContainer = document.querySelector('#answerModal .modal-buttons');
-            buttonContainer.innerHTML = '';
-            
-            buttons.forEach(button => {
-                const btn = document.createElement('button');
-                btn.className = 'btn btn-primary';
-                btn.textContent = button.text;
-                btn.onclick = button.action;
-                buttonContainer.appendChild(btn);
-            });
-            
-            document.getElementById('answerModal').style.display = 'flex';
-        }
-
-        function createExplosion() {
-            // Lógica da explosão (mantida)
-            const overlay = document.getElementById('explosionOverlay');
-            const particlesContainer = document.getElementById('explosionParticles');
-            const gameContainer = document.getElementById('mainGameContainer');
-            
-            overlay.style.display = 'block';
-            gameContainer.classList.add('screen-shake');
-            
-            particlesContainer.innerHTML = '';
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                const angle = (i / 20) * 2 * Math.PI;
-                const distance = Math.random() * 200 + 50;
-                const x = Math.cos(angle) * distance;
-                const y = Math.sin(angle) * distance;
-                particle.style.setProperty('--end-x', `${x}px`);
-                particle.style.setProperty('--end-y', `${y}px`);
-                particle.style.animation = `particle-explosion 1.5s ease-out forwards`;
-                particle.style.animationDelay = `${Math.random() * 0.3}s`;
-                const colors = ['#ff4500', '#ff6b00', '#ff8c00', '#ffa500', '#ffb347'];
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                particlesContainer.appendChild(particle);
-            }
-            
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                gameContainer.classList.remove('screen-shake');
-                particlesContainer.innerHTML = '';
-            }, 1500);
-        }
-
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeBoard();
-            updatePlayerDisplay();
-
-            // Configuração da Splash Screen
-            document.getElementById('startButton').addEventListener('click', startGame);
-            
-            // Controle de áudio do vídeo na splash screen
-            const introVideo = document.getElementById('introVideo');
-            introVideo.addEventListener('click', () => {
-                introVideo.muted = !introVideo.muted;
-                if (!introVideo.muted) {
-                    isMuted = false;
-                    document.getElementById('muteButton').textContent = '🔊';
-                }
-            });
         });
-        
-        // MANTENDO FUNÇÕES DE ELEMENT SDK (SE ESTIVER USANDO O CONTEXTO DE PLATAFORMA)
-        // ...
-        async function render(config) {
-            const gameTitle = config.game_title || "Tabuleiro Imersivo - Educação Sexual";
-            const player1Name = config.player1_name || "Jogador 1";
-            const player2Name = config.player2_name || "Jogador 2";
-            const instructionsText = config.instructions_text || "Clique na roleta para jogar! Respostas certas ganham moedas, erradas ganham bombas!";
+    });
 
-            document.getElementById('gameTitle').textContent = gameTitle;
-            document.getElementById('player1Name').textContent = player1Name;
-            document.getElementById('player2Name').textContent = player2Name;
-            document.getElementById('instructionsText').textContent = instructionsText;
-            updatePlayerDisplay();
-        }
-
-        function mapToCapabilities(config) {
-            return {
-                // ... (seu mapeamento original)
-            };
-        }
-
-        function mapToEditPanelValues(config) {
-            return new Map([
-                // ... (seu mapeamento original)
-            ]);
-        }
-        // ... (FIM DAS FUNÇÕES DE ELEMENT SDK)
-        
-    </script>
+  </script>
  </body>
 </html>
