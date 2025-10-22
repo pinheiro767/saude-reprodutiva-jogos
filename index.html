@@ -284,9 +284,9 @@
             background: linear-gradient(135deg, #9f7aea, #805ad5);
         }
 
-        /* CORREÇÃO CSS: NOVO ESTILO PARA AVATARES DENTRO DAS CASAS DO TABULEIRO */
         .square-character {
-            font-size: 0; /* Esconde o emoji */
+            /* Estilo dos avatares dentro das casas */
+            font-size: 0; 
             width: 45px;
             height: 45px;
             border-radius: 50%;
@@ -876,7 +876,7 @@
   <audio id="sfxError"><source src="assets/audio/error.mp3"></audio>
   <audio id="sfxWin"><source src="assets/audio/win.wav"></audio>
   <script>
-        // --- MAPA DE IMAGENS PERSONALIZADAS (CORRIGIDO) ---
+        // --- MAPA DE IMAGENS PERSONALIZADAS ---
         const CHARACTER_IMAGES = {
             'girl_default': 'assets/img/3.jpg',
             'girl_question': 'assets/img/2.jpg',
@@ -931,7 +931,7 @@
         let currentQuestion = null;
         let currentQuestionCallback = null;
 
-        // Elementos de áudio (CORRIGIDO: Removido o type=audio/mpeg/wav das tags, pois é redundante e pode causar erros de carregamento)
+        // Elementos de áudio
         const bgm = document.getElementById('bgm');
         const sfxCoin = document.getElementById('sfxCoin');
         const sfxError = document.getElementById('sfxError');
@@ -966,7 +966,7 @@
             audioElement.play().catch(e => console.log("Erro ao tocar áudio:", e));
         }
 
-        // --- FUNÇÃO DE MENSAGEM INLINE (mantida) ---
+        // --- FUNÇÃO DE MENSAGEM INLINE ---
         function showInlineMessage(message) {
             const messageElement = document.createElement('div');
             messageElement.style.cssText = `
@@ -1062,7 +1062,7 @@
             }, 500);
         }
 
-        // --- FUNÇÕES DE PERSONAGEM ---
+        // --- FUNÇÕES DE PERSONAGEM (CORRIGIDAS PARA USAR IMAGENS) ---
         function setAvatarImage(avatarElement, characterType, state) {
             const imageKey = `${characterType}_${state}`;
             const imagePath = CHARACTER_IMAGES[imageKey];
@@ -1071,6 +1071,7 @@
                 avatarElement.style.backgroundImage = `url('${imagePath}')`;
                 avatarElement.style.backgroundSize = 'cover';
                 avatarElement.style.backgroundPosition = 'center';
+                avatarElement.textContent = ''; // Remove qualquer conteúdo de texto
             }
         }
 
@@ -1080,23 +1081,19 @@
             const message = document.getElementById('characterMessage');
             
             if (characterCard && avatar && message) {
-                // Determina o tipo de personagem baseado na casa (par/ímpar)
                 const characterType = housePosition % 2 === 0 ? 'girl' : 'boy';
                 const characterName = characterType === 'girl' ? 'Ana' : 'João';
                 
-                // Remove classes anteriores
                 characterCard.classList.remove('happy', 'sad');
                 avatar.classList.remove('happy', 'sad');
                 message.classList.remove('happy', 'sad');
                 
-                // Define a imagem e mensagem do personagem (Pergunta)
+                // Define a imagem de PERGUNTA para o card suspenso
                 setAvatarImage(avatar, characterType, 'question');
                 message.textContent = `Olá! Eu sou ${characterName}! 😊`;
                 
-                // Mostra o card
                 characterCard.classList.add('show');
                 
-                // Remove após 2 segundos
                 setTimeout(() => {
                     characterCard.classList.remove('show');
                 }, 2000);
@@ -1118,14 +1115,14 @@
                     avatar.classList.add('happy');
                     message.classList.add('happy');
                     message.textContent = 'Parabéns! 😊';
-                    setAvatarImage(avatar, characterType, 'win');
+                    setAvatarImage(avatar, characterType, 'win'); // Imagem de ACERTO
                     playAudio(sfxWin, 0.8);
                 } else {
                     characterCard.classList.add('sad');
                     avatar.classList.add('sad');
                     message.classList.add('sad');
                     message.textContent = 'Que pena! 😔';
-                    setAvatarImage(avatar, characterType, 'lose');
+                    setAvatarImage(avatar, characterType, 'lose'); // Imagem de ERRO
                     playAudio(sfxError, 0.5);
                 }
                 
@@ -1204,27 +1201,26 @@
                 square.style.animationDelay = `${i * 0.1}s`;
                 
                 let isGirl = i % 2 === 0;
-                let charIcon = isGirl ? '👧' : '👦';
-                let labelText;
+                let charIcon, labelText;
 
                 if (i === 1) {
                     square.classList.add('start');
-                    charIcon = '🚀';
+                    charIcon = '🚀'; // Mantido emoji para INÍCIO
                     labelText = 'INÍCIO';
                 } else if (i === 40) {
                     square.classList.add('finish');
-                    charIcon = '🏆';
+                    charIcon = '🏆'; // Mantido emoji para FIM
                     labelText = 'FIM';
                 } else {
-                    // Todas as outras casas têm perguntas V/F
                     square.classList.add('vf');
-                    charIcon = '🎯';
+                    charIcon = '🎯'; 
                     labelText = 'V/F';
                 }
 
                 const character = document.createElement('div');
                 character.className = 'square-character';
-                // Define a imagem de fundo para o elemento da casa (usando imagem default)
+                
+                // CORREÇÃO: Usa a imagem DEFAULT para as casas do tabuleiro
                 setAvatarImage(character, isGirl ? 'girl' : 'boy', 'default'); 
                 
                 const label = document.createElement('div');
@@ -1234,15 +1230,8 @@
                 square.appendChild(label);
 
                 if (i === 1) {
-                    const player1 = document.createElement('div');
-                    player1.className = 'player player1';
-                    player1.textContent = '1';
-                    square.appendChild(player1);
-                    
-                    const player2 = document.createElement('div');
-                    player2.className = 'player player2';
-                    player2.textContent = '2';
-                    square.appendChild(player2);
+                    const player1 = document.createElement('div'); player1.className = 'player player1'; player1.textContent = '1'; square.appendChild(player1);
+                    const player2 = document.createElement('div'); player2.className = 'player player2'; player2.textContent = '2'; square.appendChild(player2);
                 }
                 
                 board.appendChild(square);
@@ -1279,9 +1268,7 @@
             
             const currentSquare = document.getElementById(`square-${oldPosition}`);
             const playerElement = currentSquare.querySelector(`.player.player${gameState.currentPlayer}`);
-            if (playerElement) { 
-                playerElement.remove(); 
-            }
+            if (playerElement) { playerElement.remove(); }
             
             const newSquare = document.getElementById(`square-${player.position}`);
             const newPlayer = document.createElement('div');
